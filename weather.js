@@ -5,13 +5,29 @@ async function fetchCitySuggestions(query) {
 
   try {
     const response = await fetch(url);
-    const data = await response.json();
-    return data;
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
   } catch (error) {
     console.error('Error fetching city suggestions:', error);
     return [];
   }
 }
+
+// Example usage
+async function getCitySuggestions(query) {
+  try {
+    const cities = await fetchCitySuggestions(query);
+    console.log(cities); // Process the cities data here
+  } catch (error) {
+    console.error('Failed to get city suggestions:', error);
+  }
+}
+
+// Call the function with a query
+getCitySuggestions('New York');
+
 
 
 window.addEventListener("load", () => {
