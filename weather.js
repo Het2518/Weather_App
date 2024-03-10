@@ -1,7 +1,7 @@
 const apikey = "160237aafff500f8b86c6f0ad7c384d5";
 
 async function fetchCitySuggestions(query) {
-  const url = `http://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=10&appid=${apikey}`;
+  const url = `https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=10&appid=${apikey}`;
 
   try {
     const response = await fetch(url);
@@ -12,6 +12,7 @@ async function fetchCitySuggestions(query) {
     return [];
   }
 }
+
 
 window.addEventListener("load", () => {
   if (navigator.geolocation) {
