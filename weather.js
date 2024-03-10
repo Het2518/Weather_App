@@ -5,6 +5,9 @@ async function fetchCitySuggestions(query) {
 
   try {
     const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
     const data = await response.json();
     return data;
   } catch (error) {
@@ -13,20 +16,23 @@ async function fetchCitySuggestions(query) {
   }
 }
 
-window.addEventListener("load", () => {
+window.addEventListener("load", async () => {
   if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition((position) => {
+    navigator.geolocation.getCurrentPosition(async (position) => {
       let lon = position.coords.longitude;
       let lat = position.coords.latitude;
-      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&` + `lon=${lon}&appid=${apikey}`;
+      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apikey}`;
 
-      fetch(url)
-        .then((res) => {
-          return res.json();
-        })
-        .then((data) => {
-          weatherReport(data);
-        });
+      try {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        weatherReport(data);
+      } catch (error) {
+        console.error("There was a problem with the fetch operation:", error);
+      }
     });
   }
 });
@@ -56,53 +62,54 @@ inputField.addEventListener('input', async () => {
       });
       inputField.parentNode.appendChild(suggestionsList);
     } else {
-      inputField.parentNode.removeChild(suggestionsList);
+      if (inputField.parentNode.contains(suggestionsList)) {
+        inputField.parentNode.removeChild(suggestionsList);
+      }
     }
   } else {
-    inputField.parentNode.removeChild(suggestionsList);
+    if (inputField.parentNode.contains(suggestionsList)) {
+      inputField.parentNode.removeChild(suggestionsList);
+    }
   }
 });
 
-function searchByCity() {
+async function searchByCity() {
   var place = document.getElementById('input').value;
-  const urlsearch = `https://api.openweathermap.org/data/2.5/weather?q=${place}&` + `appid=${apikey}`;
+  const urlsearch = `https://api.openweathermap.org/data/2.5/weather?q=${place}&appid=${apikey}`;
 
-  fetch(urlsearch)
-    .then((res) => {
-      if (!res.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return res.json();
-    })
-    .then((data) => {
-      weatherReport(data);
-    })
-    .catch((error) => {
-      console.error("There was a problem with the fetch operation:", error);
-    });
+  try {
+    const response = await fetch(urlsearch);
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const data = await response.json();
+    weatherReport(data);
+  } catch (error) {
+    console.error("There was a problem with the fetch operation:", error);
+  }
   document.getElementById('input').value = '';
 }
 
 function weatherReport(data) {
-  var urlcast = `https://api.openweathermap.org/data/2.5/forecast?q=${data.name}&` + `appid=${apikey}`;
+  var urlcast = `https://api.openweathermap.org/data/2.5/forecast?q=${data.name}&appid=${apikey}`;
 
   fetch(urlcast)
-    .then((res) => {
-      return res.json();
-    })
-    .then((forecast) => {
-      hourForecast(forecast);
-      dayForecast(forecast);
+      .then((res) => res.json())
+      .then((forecast) => {
+        hourForecast(forecast);
+        dayForecast(forecast);
 
-      document.getElementById('city').innerText = data.name + ', ' + data.sys.country;
-      document.getElementById('temperature').innerText = Math.floor(data.main.temp - 273) + ' °C';
-      document.getElementById('clouds').innerText = data.weather[0].description;
+        document.getElementById('city').innerText = data.name + ', ' + data.sys.country;
+        document.getElementById('temperature').innerText = Math.floor(data.main.temp - 273) + ' °C';
+        document.getElementById('clouds').innerText = data.weather[0].description;
 
-      let icon1 = data.weather[0].icon;
-      let iconurl = "https://api.openweathermap.org/img/w/" + icon1 + ".png";
-      document.getElementById('img').src = iconurl;
-    });
+        let icon1 = data.weather[0].icon;
+        let iconurl = "https://api.openweathermap.org/img/w/" + icon1 + ".png";
+        document.getElementById('img').src = iconurl;
+      });
 }
+
+// The hourForecast and dayForecast functions remain unchanged as they do not directly involve fetching data.
 
 function hourForecast(forecast) {
   document.querySelector('.templist').innerHTML = '';
