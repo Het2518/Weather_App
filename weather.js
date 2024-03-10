@@ -1,11 +1,27 @@
 const apikey = "160237aafff500f8b86c6f0ad7c384d5";
+const cache = {}; // Cache for storing previously fetched city suggestions
+
+// Debounce function to limit the rate at which a function can fire
+function debounce(func, wait) {
+  let timeout;
+  return function (...args) {
+    const context = this;
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(context, args), wait);
+  };
+}
 
 async function fetchCitySuggestions(query) {
+  if (cache[query]) {
+    return cache[query];
+  }
+
   const url = `http://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=10&appid=${apikey}`;
 
   try {
     const response = await fetch(url);
     const data = await response.json();
+    cache[query] = data; // Cache the results
     return data;
   } catch (error) {
     console.error('Error fetching city suggestions:', error);
@@ -13,29 +29,12 @@ async function fetchCitySuggestions(query) {
   }
 }
 
-window.addEventListener("load", () => {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition((position) => {
-      let lon = position.coords.longitude;
-      let lat = position.coords.latitude;
-      const url = `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&` + `lon=${lon}&appid=${apikey}`;
-
-      fetch(url)
-        .then((res) => {
-          return res.json();
-        })
-        .then((data) => {
-          weatherReport(data);
-        });
-    });
-  }
-});
-
 const inputField = document.getElementById('input');
 const suggestionsList = document.createElement('ul');
 suggestionsList.classList.add('suggestions');
 
-inputField.addEventListener('input', async () => {
+// Debounce the input event handler to reduce the number of API calls
+inputField.addEventListener('input', debounce(async () => {
   const inputValue = inputField.value.trim();
 
   if (inputValue !== '') {
@@ -61,7 +60,10 @@ inputField.addEventListener('input', async () => {
   } else {
     inputField.parentNode.removeChild(suggestionsList);
   }
-});
+}, 300)); // Wait 300ms after the user stops typing to fetch suggestions
+
+// The rest of your code remains unchanged
+
 
 function searchByCity() {
   var place = document.getElementById('input').value;
