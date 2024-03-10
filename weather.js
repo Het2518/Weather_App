@@ -74,7 +74,7 @@ inputField.addEventListener('input', async () => {
 });
 
 async function searchByCity() {
-  var place = document.getElementById('input').value;
+  const place = document.getElementById('input').value;
   const urlsearch = `https://api.openweathermap.org/data/2.5/weather?q=${place}&appid=${apikey}`;
 
   try {
@@ -91,7 +91,7 @@ async function searchByCity() {
 }
 
 function weatherReport(data) {
-  var urlcast = `https://api.openweathermap.org/data/2.5/forecast?q=${data.name}&appid=${apikey}`;
+  const urlcast = `https://api.openweathermap.org/data/2.5/forecast?q=${data.name}&appid=${apikey}`;
 
   fetch(urlcast)
       .then((res) => res.json())
@@ -108,13 +108,10 @@ function weatherReport(data) {
         document.getElementById('img').src = iconurl;
       });
 }
-
-// The hourForecast and dayForecast functions remain unchanged as they do not directly involve fetching data.
-
 function hourForecast(forecast) {
   document.querySelector('.templist').innerHTML = '';
   for (let i = 0; i < 5; i++) {
-    var date = new Date(forecast.list[i].dt * 1000);
+    const date = new Date(forecast.list[i].dt * 1000);
 
     let hourR = document.createElement('div');
     hourR.setAttribute('class', 'next');
