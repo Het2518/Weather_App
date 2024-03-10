@@ -1,13 +1,10 @@
 const apikey = "160237aafff500f8b86c6f0ad7c384d5";
 
 async function fetchCitySuggestions(query) {
-  const url = `https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=10&appid=${apikey}`;
+  const url = `http://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=10&appid=${apikey}`;
 
   try {
     const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
     const data = await response.json();
     return data;
   } catch (error) {
@@ -18,18 +15,18 @@ async function fetchCitySuggestions(query) {
 
 window.addEventListener("load", () => {
   if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(async (position) => {
+    navigator.geolocation.getCurrentPosition((position) => {
       let lon = position.coords.longitude;
       let lat = position.coords.latitude;
-      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apikey}`;
+      const url = `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&` + `lon=${lon}&appid=${apikey}`;
 
-      try {
-        const response = await fetch(url);
-        const data = await response.json();
-        weatherReport(data);
-      } catch (error) {
-        console.error("Error fetching weather data:", error);
-      }
+      fetch(url)
+          .then((res) => {
+            return res.json();
+          })
+          .then((data) => {
+            weatherReport(data);
+          });
     });
   }
 });
@@ -59,36 +56,41 @@ inputField.addEventListener('input', async () => {
       });
       inputField.parentNode.appendChild(suggestionsList);
     } else {
+      // Ensure suggestionsList is a child before attempting to remove it
       if (inputField.parentNode.contains(suggestionsList)) {
         inputField.parentNode.removeChild(suggestionsList);
       }
     }
   } else {
+    // Ensure suggestionsList is a child before attempting to remove it
     if (inputField.parentNode.contains(suggestionsList)) {
       inputField.parentNode.removeChild(suggestionsList);
     }
   }
 });
 
-async function searchByCity() {
+function searchByCity() {
   var place = document.getElementById('input').value;
-  var urlsearch = `https://api.openweathermap.org/data/2.5/weather?q=${place}&appid=${apikey}`;
+  var urlsearch = `http://api.openweathermap.org/data/2.5/weather?q=${place}&` + `appid=${apikey}`;
 
-  try {
-    const response = await fetch(urlsearch);
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    const data = await response.json();
-    weatherReport(data);
-  } catch (error) {
-    console.error("There was a problem with the fetch operation:", error);
-  }
+  fetch(urlsearch)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return res.json();
+      })
+      .then((data) => {
+        weatherReport(data);
+      })
+      .catch((error) => {
+        console.error("There was a problem with the fetch operation:", error);
+      });
   document.getElementById('input').value = '';
 }
 
 function weatherReport(data) {
-  var urlcast = `https://api.openweathermap.org/data/2.5/forecast?q=${data.name}&appid=${apikey}`;
+  let urlcast = `http://api.openweathermap.org/data/2.5/forecast?q=${data.name}&` + `appid=${apikey}`;
 
   fetch(urlcast)
       .then((res) => {
@@ -103,7 +105,7 @@ function weatherReport(data) {
         document.getElementById('clouds').innerText = data.weather[0].description;
 
         let icon1 = data.weather[0].icon;
-        let iconurl = "https://api.openweathermap.org/img/w/" + icon1 + ".png";
+        let iconurl = "http://api.openweathermap.org/img/w/" + icon1 + ".png";
         document.getElementById('img').src = iconurl;
       });
 }
