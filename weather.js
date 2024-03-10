@@ -1,7 +1,7 @@
 const apikey = "160237aafff500f8b86c6f0ad7c384d5";
 
 async function fetchCitySuggestions(query) {
-  const url = `http://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=10&appid=${apikey}`;
+  const url = `https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=10&appid=${apikey}`;
 
   try {
     const response = await fetch(url);
@@ -18,7 +18,7 @@ window.addEventListener("load", () => {
     navigator.geolocation.getCurrentPosition((position) => {
       let lon = position.coords.longitude;
       let lat = position.coords.latitude;
-      const url = `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&` + `lon=${lon}&appid=${apikey}`;
+      const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&` + `lon=${lon}&appid=${apikey}`;
 
       fetch(url)
         .then((res) => {
@@ -65,7 +65,7 @@ inputField.addEventListener('input', async () => {
 
 function searchByCity() {
   var place = document.getElementById('input').value;
-  var urlsearch = `http://api.openweathermap.org/data/2.5/weather?q=${place}&` + `appid=${apikey}`;
+  const urlsearch = `https://api.openweathermap.org/data/2.5/weather?q=${place}&` + `appid=${apikey}`;
 
   fetch(urlsearch)
     .then((res) => {
@@ -84,7 +84,7 @@ function searchByCity() {
 }
 
 function weatherReport(data) {
-  var urlcast = `http://api.openweathermap.org/data/2.5/forecast?q=${data.name}&` + `appid=${apikey}`;
+  var urlcast = `https://api.openweathermap.org/data/2.5/forecast?q=${data.name}&` + `appid=${apikey}`;
 
   fetch(urlcast)
     .then((res) => {
@@ -99,7 +99,7 @@ function weatherReport(data) {
       document.getElementById('clouds').innerText = data.weather[0].description;
 
       let icon1 = data.weather[0].icon;
-      let iconurl = "http://api.openweathermap.org/img/w/" + icon1 + ".png";
+      let iconurl = "https://api.openweathermap.org/img/w/" + icon1 + ".png";
       document.getElementById('img').src = iconurl;
     });
 }
